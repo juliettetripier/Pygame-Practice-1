@@ -12,6 +12,8 @@ class Game:
         #set game title
         pygame.display.set_caption('Practice Project 1')
 
+        self.test_surface = pygame.image.load('../graphics/Sky.png')
+
     def run(self):
         #set up a loop to keep your game running forever, until you reach a quit event
         #in your loop, draw all your elements and update everything
@@ -23,6 +25,9 @@ class Game:
                     sys.exit()
             
             self.screen.fill('black')
+            # blit = "block image transfer" - put a surface on another surface
+            # two arguments - blit(surface to place it on, position)
+            self.screen.blit(self.test_surface, (0,0))
             #update the display surface so anything drawn inside the while loop is displayed
             pygame.display.update()
             #set the maximum framerate to make sure the game doesn't run too fast
