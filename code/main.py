@@ -14,6 +14,8 @@ class Game:
         #set up font - pygame.font.Font(font type, font size)
         self.test_font = pygame.font.Font('../font/Pixeltype.ttf', 50)
 
+        self.game_active = True
+
         self.sky_surface = pygame.image.load('../graphics/Sky.png').convert()
         self.ground_surface = pygame.image.load('../graphics/ground.png').convert()
 
@@ -28,6 +30,8 @@ class Game:
         #for rendering fonts: render(text info, anti-alias boolean, color)
         self.score_surface = self.test_font.render('My game', False, (64,64,64))
         self.score_rect = self.score_surface.get_rect(center = (400, 50))
+        self.score_bg = self.score_rect.inflate(10,10)
+    
 
     def run(self):
         #set up a loop to keep your game running forever, until you reach a quit event
@@ -38,41 +42,52 @@ class Game:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if self.player_rect.collidepoint(event.pos):
-                        if self.player_rect.bottom == 300:
-                            self.player_gravity = -20
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_SPACE:
-                        if self.player_rect.bottom == 300:
-                            self.player_gravity = -20
+                if self.game_active:
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if self.player_rect.collidepoint(event.pos):
+                            if self.player_rect.bottom == 300:
+                                self.player_gravity = -20
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_SPACE:
+                            if self.player_rect.bottom == 300:
+                                self.player_gravity = -20
+                else:
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_SPACE:
+                            self.game_active = True
             
-            self.screen.fill('black')
+            if self.game_active:
+                # Background
+                # blit = "block image transfer" - put a surface on another surface
+                # two arguments - blit(surface to place it on, position)
+                self.screen.blit(self.sky_surface, (0,0))
+                self.screen.blit(self.ground_surface, (0, 300))
 
-            # Background
-            # blit = "block image transfer" - put a surface on another surface
-            # two arguments - blit(surface to place it on, position)
-            self.screen.blit(self.sky_surface, (0,0))
-            self.screen.blit(self.ground_surface, (0, 300))
+                # Score
+                #draw a rectangle background behind the score text (display surface, color, rectangle)
+                # pygame.draw.rect(self.screen, '#c0e8ec', self.score_rect)
+                pygame.draw.rect(self.screen, '#c0e8ec', self.score_bg)
+                self.screen.blit(self.score_surface, self.score_rect)
 
-            # Score
-            #draw a rectangle background behind the score text (display surface, color, rectangle)
-            pygame.draw.rect(self.screen, '#c0e8ec', self.score_rect, 10)
-            pygame.draw.rect(self.screen, '#c0e8ec', self.score_rect)
-            self.screen.blit(self.score_surface, self.score_rect)
+                # Snail
+                self.snail_rect.x -= 4
+                if self.snail_rect.right < 0:
+                    self.snail_rect.left = 800
+                self.screen.blit(self.snail_surface, self.snail_rect)
 
-            # Snail
-            self.snail_rect.x -= 4
-            if self.snail_rect.right < 0:
-                self.snail_rect.left = 800
-            self.screen.blit(self.snail_surface, self.snail_rect)
+                # Player
+                self.player_gravity += 1
+                self.player_rect.y += self.player_gravity
+                if self.player_rect.bottom >= 300:
+                    self.player_rect.bottom = 300
+                self.screen.blit(self.player_surface, self.player_rect)
 
-            # Player
-            self.player_gravity += 1
-            self.player_rect.y += self.player_gravity
-            if self.player_rect.bottom >= 300:
-                self.player_rect.bottom = 300
-            self.screen.blit(self.player_surface, self.player_rect)
+                # Collision
+                if self.snail_rect.colliderect(self.player_rect):
+                    self.game_active = False
+                
+            else:
+                self.screen.fill('black')
 
             #update the display surface so anything drawn inside the while loop is displayed
             pygame.display.update()
