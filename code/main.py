@@ -3,6 +3,7 @@ from settings import *
 
 class Game:
     def display_score(self):
+        '''Calculate the current time, draw it onto the screen, and return it.'''
         current_time = int(pygame.time.get_ticks() / 1000) - self.start_time
         score_surface = self.test_font.render(f'Score: {current_time}',False,(64,64,64))
         score_rect = score_surface.get_rect(center = (400, 50))
@@ -26,6 +27,7 @@ class Game:
         self.game_active = False
 
         self.start_time = 0
+        self.score = 0
 
         self.sky_surface = pygame.image.load('../graphics/Sky.png').convert()
         self.ground_surface = pygame.image.load('../graphics/ground.png').convert()
@@ -83,7 +85,7 @@ class Game:
                 self.screen.blit(self.ground_surface, (0, 300))
 
                 # Score
-                self.display_score()
+                self.score = self.display_score()
 
                 # Snail
                 self.snail_rect.x -= 6
@@ -106,7 +108,14 @@ class Game:
                 self.screen.fill((94, 129, 162))
                 self.screen.blit(self.player_stand, self.player_stand_rect)
                 self.screen.blit(self.game_name, self.game_name_rect)
-                self.screen.blit(self.game_message, self.game_message_rect)
+                score_message = self.test_font.render(f'Your score: {self.score}', False, (111,196,169))
+                score_message_rect = score_message.get_rect(center = (400,330))
+
+                if self.score == 0:
+                    self.screen.blit(self.game_message, self.game_message_rect)
+                else:
+                    self.screen.blit(score_message, score_message_rect)
+                
 
             #update the display surface so anything drawn inside the while loop is displayed
             pygame.display.update()
