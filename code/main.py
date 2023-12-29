@@ -18,10 +18,20 @@ class Game:
         if obstacle_list:
             for obstacle_rect in obstacle_list:
                 obstacle_rect.x -= 5
-                self.screen.blit(self.snail_surface, obstacle_rect)
+                if obstacle_rect.bottom == 300:
+                    self.screen.blit(self.snail_surface, obstacle_rect)
+                else:
+                    self.screen.blit(self.fly_surface, obstacle_rect)
             obstacle_list = [obstacle for obstacle in obstacle_list if obstacle.x > -100]
             return obstacle_list
         return []
+
+    def collisions(self, player, obstacles):
+        if obstacles:
+            for obstacle_rect in obstacles:
+                if player.colliderect(obstacle_rect):
+                    return False
+        return True
 
     def __init__(self):
 
@@ -45,7 +55,7 @@ class Game:
 
         # Obstacles
         self.snail_surface = pygame.image.load('../graphics/snail/snail1.png').convert_alpha()
-        self.snail_rect = self.snail_surface.get_rect(midbottom = (600,300))
+        self.fly_surface = pygame.image.load('../graphics/fly/fly1.png').convert_alpha()
         self.obstacle_rect_list = []
 
         self.player_surface = pygame.image.load('../graphics/player/player_walk_1.png').convert_alpha()
@@ -91,11 +101,13 @@ class Game:
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_SPACE:
                             self.game_active = True
-                            self.snail_rect.left = 800
                             self.start_time = int(pygame.time.get_ticks() / 1000)
 
                 if event.type == self.obstacle_timer and self.game_active:
-                    self.obstacle_rect_list.append(self.snail_surface.get_rect(midbottom = (randint(900,1100),300)))
+                    if randint(0,2):
+                        self.obstacle_rect_list.append(self.snail_surface.get_rect(midbottom = (randint(900,1100),300)))
+                    else:
+                        self.obstacle_rect_list.append(self.fly_surface.get_rect(midbottom = (randint(900,1100),210)))
             
             if self.game_active:
                 # Background
@@ -119,12 +131,12 @@ class Game:
 
 
                 # Collision
-                if self.snail_rect.colliderect(self.player_rect):
-                    self.game_active = False
+                self.game_active = self.collisions(self.player_rect, self.obstacle_rect_list)
                 
             else:
                 self.screen.fill((94, 129, 162))
                 self.screen.blit(self.player_stand, self.player_stand_rect)
+                self.obstacle_rect_list.clear()
                 self.screen.blit(self.game_name, self.game_name_rect)
                 score_message = self.test_font.render(f'Your score: {self.score}', False, (111,196,169))
                 score_message_rect = score_message.get_rect(center = (400,330))
