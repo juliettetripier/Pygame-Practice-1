@@ -1,5 +1,7 @@
 import pygame, sys
+from random import randint
 from settings import *
+
 
 class Game:
     def display_score(self):
@@ -11,6 +13,15 @@ class Game:
         pygame.draw.rect(self.screen, '#c0e8ec', score_bg)
         self.screen.blit(score_surface, score_rect)
         return current_time
+    
+    def obstacle_movement(self, obstacle_list):
+        if obstacle_list:
+            for obstacle_rect in obstacle_list:
+                obstacle_rect.x -= 5
+                self.screen.blit(self.snail_surface, obstacle_rect)
+            obstacle_list = [obstacle for obstacle in obstacle_list if obstacle.x > -100]
+            return obstacle_list
+        return []
 
     def __init__(self):
 
@@ -32,8 +43,10 @@ class Game:
         self.sky_surface = pygame.image.load('../graphics/Sky.png').convert()
         self.ground_surface = pygame.image.load('../graphics/ground.png').convert()
 
+        # Obstacles
         self.snail_surface = pygame.image.load('../graphics/snail/snail1.png').convert_alpha()
         self.snail_rect = self.snail_surface.get_rect(midbottom = (600,300))
+        self.obstacle_rect_list = []
 
         self.player_surface = pygame.image.load('../graphics/player/player_walk_1.png').convert_alpha()
         #set up the player rectangle using get_rect() to draw a rectangle around the surface
@@ -50,6 +63,10 @@ class Game:
 
         self.game_message = self.test_font.render('Press space to run', False, (111,196,169))
         self.game_message_rect = self.game_message.get_rect(center = (400, 330))
+
+        # Timer
+        self.obstacle_timer = pygame.USEREVENT + 1 # add +1 to each event you add
+        pygame.time.set_timer(self.obstacle_timer, 1500)
     
 
     def run(self):
@@ -76,6 +93,9 @@ class Game:
                             self.game_active = True
                             self.snail_rect.left = 800
                             self.start_time = int(pygame.time.get_ticks() / 1000)
+
+                if event.type == self.obstacle_timer and self.game_active:
+                    self.obstacle_rect_list.append(self.snail_surface.get_rect(midbottom = (randint(900,1100),300)))
             
             if self.game_active:
                 # Background
@@ -87,12 +107,6 @@ class Game:
                 # Score
                 self.score = self.display_score()
 
-                # Snail
-                self.snail_rect.x -= 6
-                if self.snail_rect.right < 0:
-                    self.snail_rect.left = 800
-                self.screen.blit(self.snail_surface, self.snail_rect)
-
                 # Player
                 self.player_gravity += 1
                 self.player_rect.y += self.player_gravity
@@ -100,13 +114,16 @@ class Game:
                     self.player_rect.bottom = 300
                 self.screen.blit(self.player_surface, self.player_rect)
 
+                # Obstacle Movement
+                self.obstacle_rect_list = self.obstacle_movement(self.obstacle_rect_list)
+
+
                 # Collision
                 if self.snail_rect.colliderect(self.player_rect):
                     self.game_active = False
                 
             else:
                 self.screen.fill((94, 129, 162))
-                # test
                 self.screen.blit(self.player_stand, self.player_stand_rect)
                 self.screen.blit(self.game_name, self.game_name_rect)
                 score_message = self.test_font.render(f'Your score: {self.score}', False, (111,196,169))
