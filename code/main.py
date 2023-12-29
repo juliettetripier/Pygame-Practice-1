@@ -106,6 +106,7 @@ class Game:
                 
             else:
                 self.screen.fill((94, 129, 162))
+                # test
                 self.screen.blit(self.player_stand, self.player_stand_rect)
                 self.screen.blit(self.game_name, self.game_name_rect)
                 score_message = self.test_font.render(f'Your score: {self.score}', False, (111,196,169))
