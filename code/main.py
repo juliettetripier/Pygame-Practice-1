@@ -1,6 +1,7 @@
-import pygame, sys
+import pygame
+import sys
 from random import randint
-from settings import *
+from settings import width, height, fps
 
 
 class Game:
@@ -32,6 +33,17 @@ class Game:
                 if player.colliderect(obstacle_rect):
                     return False
         return True
+    
+    def player_animation(self):
+        # play walking animation if character is on floor
+        # display jump surface when player is not on floor
+        if self.player_rect.bottom < 300:
+            self.player_surface = self.player_jump
+        else:
+            self.player_index += 0.1
+            if self.player_index >= len(self.player_walk):
+                self.player_index = 0
+            self.player_surface = self.player_walk[int(self.player_index)]
 
     def __init__(self):
 
@@ -54,12 +66,30 @@ class Game:
         self.ground_surface = pygame.image.load('../graphics/ground.png').convert()
 
         # Obstacles
-        self.snail_surface = pygame.image.load('../graphics/snail/snail1.png').convert_alpha()
-        self.fly_surface = pygame.image.load('../graphics/fly/fly1.png').convert_alpha()
+        # Snail
+        self.snail_frame_1 = pygame.image.load('../graphics/snail/snail1.png').convert_alpha()
+        self.snail_frame_2 = pygame.image.load('../graphics/snail/snail2.png').convert_alpha()
+        self.snail_frames = [self.snail_frame_1, self.snail_frame_2]
+        self.snail_frame_index = 0
+        self.snail_surface = self.snail_frames[self.snail_frame_index]
+
+        # Fly
+        self.fly_frame_1 = pygame.image.load('../graphics/fly/fly1.png').convert_alpha()
+        self.fly_frame_2 = pygame.image.load('../graphics/fly/fly2.png').convert_alpha()
+        self.fly_frames = [self.fly_frame_1, self.fly_frame_2]
+        self.fly_frame_index = 0
+        self.fly_surface = self.fly_frames[self.fly_frame_index]
+
         self.obstacle_rect_list = []
 
-        self.player_surface = pygame.image.load('../graphics/player/player_walk_1.png').convert_alpha()
-        #set up the player rectangle using get_rect() to draw a rectangle around the surface
+        # Player
+        self.player_walk_1 = pygame.image.load('../graphics/player/player_walk_1.png').convert_alpha()
+        self.player_walk_2 = pygame.image.load('../graphics/player/player_walk_2.png').convert_alpha()
+        self.player_walk = [self.player_walk_1,self.player_walk_2]
+        self.player_index = 0
+        self.player_jump = pygame.image.load('../graphics/player/jump.png').convert_alpha()
+
+        self.player_surface = self.player_walk[self.player_index]
         self.player_rect = self.player_surface.get_rect(midbottom = (80,300))
         self.player_gravity = 0
 
@@ -124,6 +154,7 @@ class Game:
                 self.player_rect.y += self.player_gravity
                 if self.player_rect.bottom >= 300:
                     self.player_rect.bottom = 300
+                self.player_animation()
                 self.screen.blit(self.player_surface, self.player_rect)
 
                 # Obstacle Movement
@@ -137,6 +168,9 @@ class Game:
                 self.screen.fill((94, 129, 162))
                 self.screen.blit(self.player_stand, self.player_stand_rect)
                 self.obstacle_rect_list.clear()
+                self.player_rect.midbottom = (80,300)
+                self.player_gravity = 0
+
                 self.screen.blit(self.game_name, self.game_name_rect)
                 score_message = self.test_font.render(f'Your score: {self.score}', False, (111,196,169))
                 score_message_rect = score_message.get_rect(center = (400,330))
