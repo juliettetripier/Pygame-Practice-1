@@ -107,6 +107,12 @@ class Game:
         # Timer
         self.obstacle_timer = pygame.USEREVENT + 1 # add +1 to each event you add
         pygame.time.set_timer(self.obstacle_timer, 1500)
+
+        self.snail_animation_timer = pygame.USEREVENT + 2
+        pygame.time.set_timer(self.snail_animation_timer, 500)
+
+        self.fly_animation_timer = pygame.USEREVENT + 3
+        pygame.time.set_timer(self.fly_animation_timer, 200)
     
 
     def run(self):
@@ -133,11 +139,26 @@ class Game:
                             self.game_active = True
                             self.start_time = int(pygame.time.get_ticks() / 1000)
 
-                if event.type == self.obstacle_timer and self.game_active:
-                    if randint(0,2):
-                        self.obstacle_rect_list.append(self.snail_surface.get_rect(midbottom = (randint(900,1100),300)))
-                    else:
-                        self.obstacle_rect_list.append(self.fly_surface.get_rect(midbottom = (randint(900,1100),210)))
+                if self.game_active:
+                    if event.type == self.obstacle_timer:
+                        if randint(0,2):
+                            self.obstacle_rect_list.append(self.snail_surface.get_rect(midbottom = (randint(900,1100),300)))
+                        else:
+                            self.obstacle_rect_list.append(self.fly_surface.get_rect(midbottom = (randint(900,1100),210)))
+                    
+                    if event.type == self.snail_animation_timer:
+                        if self.snail_frame_index == 0:
+                            self.snail_frame_index = 1
+                        else:
+                            self.snail_frame_index = 0
+                        self.snail_surface = self.snail_frames[self.snail_frame_index]
+                    if event.type == self.fly_animation_timer:
+                        if self.fly_frame_index == 0:
+                            self.fly_frame_index = 1
+                        else:
+                            self.fly_frame_index = 0
+                        self.fly_surface = self.fly_frames[self.fly_frame_index]
+
             
             if self.game_active:
                 # Background
