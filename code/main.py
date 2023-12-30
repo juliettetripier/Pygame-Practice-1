@@ -84,13 +84,23 @@ class Game:
         '''Calculate the current time, draw it onto the screen, and return it.'''
         current_time = int(pygame.time.get_ticks() / 1000) - self.start_time
         score_surface = self.test_font.render(f'Score: {current_time}',False,(64,64,64))
-        score_rect = score_surface.get_rect(center = (400, 50))
+        if self.high_score:
+            score_rect = score_surface.get_rect(center = (200, 50))
+        else:
+            score_rect = score_surface.get_rect(center = (400, 50))
         score_bg = score_rect.inflate(10,10)
         pygame.draw.rect(self.screen, '#c0e8ec', score_bg)
         self.screen.blit(score_surface, score_rect)
         return current_time
 
-    
+    def display_high_score(self):
+        if self.high_score:
+            high_score_surface = self.test_font.render(f'High Score: {self.high_score}',False,(64,64,64))
+            high_score_rect = high_score_surface.get_rect(center = (600, 50))
+            high_score_bg = high_score_rect.inflate(10,10)
+            pygame.draw.rect(self.screen, '#c0e8ec', high_score_bg)
+            self.screen.blit(high_score_surface, high_score_rect)
+
     def collision_sprite(self):
         if pygame.sprite.spritecollide(self.player.sprite, self.obstacle_group, False):
             self.obstacle_group.empty()
@@ -99,20 +109,17 @@ class Game:
 
     def __init__(self):
 
-        pygame.init() #starts pygame
-        #create your display
+        pygame.init()
         self.screen = pygame.display.set_mode((width, height))
-        #create clock object
         self.clock = pygame.time.Clock()
-        #set game title
         pygame.display.set_caption('Practice Project 1')
-        #set up font - pygame.font.Font(font type, font size)
         self.test_font = pygame.font.Font('../font/Pixeltype.ttf', 50)
 
         self.game_active = False
 
         self.start_time = 0
         self.score = 0
+        self.high_score = 0
 
         self.bg_music = pygame.mixer.Sound('../audio/music.wav')
         self.bg_music.set_volume(0.2)
@@ -152,10 +159,7 @@ class Game:
     
 
     def run(self):
-        #set up a loop to keep your game running forever, until you reach a quit event
-        #in your loop, draw all your elements and update everything
         while True:
-            #set up event loop - get events and loop through each
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -172,14 +176,13 @@ class Game:
                         self.obstacle_group.add(Obstacle(choice(['fly', 'snail', 'snail', 'snail'])))
             
             if self.game_active:
-                # Background
-                # blit = "block image transfer" - put a surface on another surface
-                # two arguments - blit(surface to place it on, position)
+
                 self.screen.blit(self.sky_surface, (0,0))
                 self.screen.blit(self.ground_surface, (0, 300))
 
                 # Score
                 self.score = self.display_score()
+                self.display_high_score()
 
                 # Player
                 self.player.draw(self.screen)
@@ -199,17 +202,23 @@ class Game:
                 self.screen.blit(self.game_name, self.game_name_rect)
                 score_message = self.test_font.render(f'Your score: {self.score}', False, (111,196,169))
                 score_message_rect = score_message.get_rect(center = (400,330))
+                high_score_message = self.test_font.render(f'High score! {self.score}', False, 'Yellow')
+                high_score_message_rect = high_score_message.get_rect(center = (400,330))
+
+                if self.score > self.high_score:
+                    self.high_score = self.score
 
                 if self.score == 0:
                     self.screen.blit(self.game_message, self.game_message_rect)
+                elif self.score >= self.high_score:
+                    self.screen.blit(high_score_message, high_score_message_rect)
                 else:
                     self.screen.blit(score_message, score_message_rect)
                 
-
-            #update the display surface so anything drawn inside the while loop is displayed
+                
+                
             pygame.display.update()
 
-            #set the maximum framerate to make sure the game doesn't run too fast
             self.clock.tick(fps)
 
 if __name__ == '__main__':
