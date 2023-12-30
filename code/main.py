@@ -13,7 +13,7 @@ class Player(pygame.sprite.Sprite):
         self.player_jump = pygame.image.load('../graphics/player/jump.png').convert_alpha()
 
         self.image = self.player_walk[self.player_index]
-        self.rect = self.image.get_rect(midbottom = (200,300))
+        self.rect = self.image.get_rect(midbottom = (80,300))
         self.gravity = 0
 
     def player_input(self):
@@ -103,6 +103,12 @@ class Game:
             for obstacle_rect in obstacles:
                 if player.colliderect(obstacle_rect):
                     return False
+        return True
+    
+    def collision_sprite(self):
+        if pygame.sprite.spritecollide(self.player.sprite, self.obstacle_group, False):
+            self.obstacle_group.empty()
+            return False
         return True
     
     def player_animation(self):
@@ -267,6 +273,7 @@ class Game:
 
 
                 # Collision
+                self.game_active = self.collision_sprite()
                 # self.game_active = self.collisions(self.player_rect, self.obstacle_rect_list)
                 
             else:
