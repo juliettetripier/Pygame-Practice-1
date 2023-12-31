@@ -3,6 +3,13 @@ import sys
 from random import randint, choice
 from settings import width, height, fps
 
+def get_speed_modifier(game):
+    if game.score >= 100:
+        speed_modifier = 5
+    else:
+        speed_modifier = int(game.score / 20)
+    return speed_modifier
+
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -54,11 +61,13 @@ class Obstacle(pygame.sprite.Sprite):
             fly_2 = pygame.image.load('../graphics/fly/fly2.png').convert_alpha()
             self.frames = [fly_1, fly_2]
             y_pos = 210
+            self.speed = 6
         else:
             snail_1 = pygame.image.load('../graphics/snail/snail1.png').convert_alpha()
             snail_2 = pygame.image.load('../graphics/snail/snail2.png').convert_alpha()
             self.frames = [snail_1, snail_2]
             y_pos = 300
+            self.speed = 6
 
         self.animation_index = 0
         self.image = self.frames[self.animation_index]
@@ -70,9 +79,16 @@ class Obstacle(pygame.sprite.Sprite):
             self.animation_index = 0
         self.image = self.frames[int(self.animation_index)]
 
+    # def get_speed_modifier(self, game):
+    #     if game.score >= 100:
+    #         speed_modifier = 5
+    #     else:
+    #         speed_modifier = int(game.score / 20)
+    #     return speed_modifier
+
     def update(self):
         self.animation_state()
-        self.rect.x -= 6
+        self.rect.x -= self.speed + get_speed_modifier(game)
         self.destroy()
 
     def destroy(self):
@@ -174,6 +190,7 @@ class Game:
                 if self.game_active:
                     if event.type == self.obstacle_timer:
                         self.obstacle_group.add(Obstacle(choice(['fly', 'snail', 'snail', 'snail'])))
+                        pygame.time.set_timer(self.obstacle_timer, (1500 - (get_speed_modifier(self) * 150)))
             
             if self.game_active:
 
@@ -214,8 +231,6 @@ class Game:
                     self.screen.blit(high_score_message, high_score_message_rect)
                 else:
                     self.screen.blit(score_message, score_message_rect)
-                
-                
                 
             pygame.display.update()
 
